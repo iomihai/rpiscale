@@ -1,0 +1,3 @@
+disconnect xx:xx:xx:xx:xx:xx
+exit
+
