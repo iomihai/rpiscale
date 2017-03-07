@@ -26,12 +26,6 @@ pacman -Syy && pacman -Syu --noconfirm
 pacman -S --noconfirm bluez bluez-utils
 systemctl enable --now bluetooth
 ```
-For the bluetooth adapter to be powered on during startup create ```/etc/udev/rules.d/10-local.rules```
-
-```
-# Set bluetooth power up
-ACTION=="add", KERNEL=="hci[0-9]*", RUN+="/usr/bin/hciconfig %k up"
-```
 
 Pair the board using ```bluetoothctl``` and enable the agent to connect the board when you press the balance board button
 
@@ -50,10 +44,22 @@ trust xx:xx:xx:xx:xx:xx
 exit
 ```
 
+To set the bluetooth adapter to be powered on during startup add ```AutoEnable=true``` in the ```[Policy]``` section of ```/etc/bluetooth/main.conf```
+
 More info here
 https://wiki.archlinux.org/index.php/bluetooth#Bluetoothctl
 
-The latest update needs a config edit to be able for the bluetooth udev rule to work, if it does not powers on at start up, edit the systemd-udevd.service and add AF_BLUETOOTH at end of *RestrictAddressFamilies*
+
+#### Obsolete bluetooth settings for bluez older than 5.44
+
+For the bluetooth adapter to be powered on during startup create ```/etc/udev/rules.d/10-local.rules```
+
+```
+### Set bluetooth power up
+ACTION=="add", KERNEL=="hci[0-9]*", RUN+="/usr/bin/hciconfig %k up"
+```
+
+###### You may need to edit ```systemd-udevd.service``` for the bluetooth udev rule to work, if it does not powers on at start up, add AF_BLUETOOTH at end of *RestrictAddressFamilies*
 
 ```
 systemctl edit --full systemd-udevd.service
@@ -114,10 +120,14 @@ Enable the SPI interface by adding to ```/boot/config.txt```
 ```
 device_tree_param=spi=on
 ```
-Install RPi.GPIO and Adafruit_GPIO
+Install RPi.GPIO
 ```
 pip2 install RPi.GPIO
-pip2 install Adafruit_GPIO
+```
+
+Install Adafruit_GPIO from sources (current version 1.0.3) and not from pip (version 1.0.1) because the pip version it does not properly detect the raspberry with kernel 4.9.13
+```
+pip2 install git+https://github.com/adafruit/Adafruit_Python_GPIO
 ```
 Build and install Adafruit_Nokia_LCD
 ```
